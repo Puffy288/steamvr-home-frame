@@ -2,7 +2,7 @@
 
 ## TLDR: how to install
 
-1. On your **Frame**, download **SteamVR-Home-Frame-Install.run** from this project’s **Releases**.
+1. On your **Steam Frame**, select **[Download the installer — SteamVR-Home-Frame-Install.run](https://github.com/Puffy288/steamvr-home-frame/releases/download/v0.1.0/SteamVR-Home-Frame-Install.run)**. Save it in **Downloads**. This is the only file you need; you do not need a source-code ZIP.
 2. Open **Konsole**, paste this with the thumbstick’s right-click menu, then select **Enter** on the on-screen keyboard:
 
 ```bash

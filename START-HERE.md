@@ -18,7 +18,9 @@ Select the browser’s address bar, open the VR window’s on-screen keyboard, a
 
 ## 3. Download the installer
 
-On the project page, open **Releases → newest release → Assets**. Download **SteamVR-Home-Frame-Install.run** into **Downloads** and wait for it to finish. You do not need the “Source code” ZIP or a GitHub account to download it.
+On your **Steam Frame**, select **[Download the installer — SteamVR-Home-Frame-Install.run](https://github.com/Puffy288/steamvr-home-frame/releases/download/v0.1.0/SteamVR-Home-Frame-Install.run)**. Save it in **Downloads** and wait for it to finish. This is the only file you need. You do not need a source-code ZIP or a GitHub account.
+
+If you are using the release page instead, scroll to the bottom and expand **Assets**, then select **SteamVR-Home-Frame-Install.run**.
 
 Keep Steam running and signed in. Setup handles the remaining downloads, including Valve’s FEX runtime if it is missing.
 
