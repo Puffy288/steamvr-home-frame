@@ -1,0 +1,124 @@
+{
+  "metadata_url": "https://repo.steampowered.com/steamrt1/images/1.0.20260714.251828/steam-runtime.manifest.deb822.gz",
+  "packages": [
+    {
+      "name": "libpng12-0",
+      "version": "1.2.46-3ubuntu4.3+steamrt1.1+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libp/libpng/libpng12-0_1.2.46-3ubuntu4.3%2Bsteamrt1.1%2Bsrt1_amd64.deb",
+      "sha256": "07f3e5c0873fddccdfff6cc83d9652c69685260ea7b07fc30b17bc8bb583d625",
+      "size": 171698
+    },
+    {
+      "name": "libva2",
+      "version": "2.1.0-3~steamrt1.2+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libv/libva/libva2_2.1.0-3~steamrt1.2%2Bsrt1_amd64.deb",
+      "sha256": "08c60888e39e4656fa4c41dbbb2baa0d99f91a8fabbf5336261b255c0ea4f185",
+      "size": 56598
+    },
+    {
+      "name": "libvdpau1",
+      "version": "0.4.1-3ubuntu1.2+steamrt1.1+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libv/libvdpau/libvdpau1_0.4.1-3ubuntu1.2%2Bsteamrt1.1%2Bsrt1_amd64.deb",
+      "sha256": "ec3c608e2404a349be358514dd9bda04fc2dd1c8a47dff6b45fb1caedd9ad133",
+      "size": 26310
+    },
+    {
+      "name": "libva-x11-2",
+      "version": "2.1.0-3~steamrt1.2+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libv/libva/libva-x11-2_2.1.0-3~steamrt1.2%2Bsrt1_amd64.deb",
+      "sha256": "47f70088a25e92b036374d8ff132e11b38546f26ee2e6cba141d42f766d8c748",
+      "size": 21228
+    },
+    {
+      "name": "libva-drm2",
+      "version": "2.1.0-3~steamrt1.2+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libv/libva/libva-drm2_2.1.0-3~steamrt1.2%2Bsrt1_amd64.deb",
+      "sha256": "5add6487f678a13cc71d039b1ebd6991b1395dd8ce78124ac3675ea80f10e1b8",
+      "size": 16636
+    },
+    {
+      "name": "libva-glx2",
+      "version": "2.1.0-3~steamrt1.2+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libv/libva/libva-glx2_2.1.0-3~steamrt1.2%2Bsrt1_amd64.deb",
+      "sha256": "7a14fde5181a5c313e97bcb25d6233c7343ebc009c3c5065bb65e8d3ec74f643",
+      "size": 20226
+    },
+    {
+      "name": "libxfixes3",
+      "version": "1:5.0-4ubuntu4.4+steamrt1.1+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libx/libxfixes/libxfixes3_5.0-4ubuntu4.4%2Bsteamrt1.1%2Bsrt1_amd64.deb",
+      "sha256": "ac19137609b6a9a651a07901bc86f10c36f5952055d7ba7027653c0b37bc6c02",
+      "size": 13126
+    },
+    {
+      "name": "libpulse0",
+      "version": "1:1.1-0ubuntu15.4+steamrt1.1+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/p/pulseaudio/libpulse0_1.1-0ubuntu15.4%2Bsteamrt1.1%2Bsrt1_amd64.deb",
+      "sha256": "a5562379952154fda251959e4a767837f676d263d8a25401ffd3a8370d00ca93",
+      "size": 267282
+    },
+    {
+      "name": "libasyncns0",
+      "version": "0.8-4+srt6",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/liba/libasyncns/libasyncns0_0.8-4%2Bsrt6_amd64.deb",
+      "sha256": "308bdf466ad5ce87f2a27712d4e4a6e41747d001fc0ded53760238357e14dec8",
+      "size": 12132
+    },
+    {
+      "name": "libdbus-1-3",
+      "version": "1.4.18-1ubuntu1.10+steamrt1.2+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/d/dbus/libdbus-1-3_1.4.18-1ubuntu1.10%2Bsteamrt1.2%2Bsrt1_amd64.deb",
+      "sha256": "78d93ca2eb121f8bcfe8674a55a897d3d4c2f615a6841ebe7802529b2c836ec7",
+      "size": 133894
+    },
+    {
+      "name": "libsndfile1",
+      "version": "1.0.25-4+steamrt1.1ubuntu0.1+srt2",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libs/libsndfile/libsndfile1_1.0.25-4%2Bsteamrt1.1ubuntu0.1%2Bsrt2_amd64.deb",
+      "sha256": "042a5c518bdd3152ef8052bd7a88babb31077840ce85383034c0e54d29f6ed07",
+      "size": 210808
+    },
+    {
+      "name": "libflac8",
+      "version": "1.2.1-6+steamrt1.1ubuntu0.1+srt2",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/f/flac/libflac8_1.2.1-6%2Bsteamrt1.1ubuntu0.1%2Bsrt2_amd64.deb",
+      "sha256": "11299782d3bf532468cdd2c1599a170b8f2704a9efb44f703b68d7434a44dc57",
+      "size": 128124
+    },
+    {
+      "name": "libogg0",
+      "version": "1.3.2-1+srt2",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libo/libogg/libogg0_1.3.2-1%2Bsrt2_amd64.deb",
+      "sha256": "d5999d3f774c2c3fbb8998d7ed686b38505a67a1fb45ec07aa288fad9c0210b8",
+      "size": 18304
+    },
+    {
+      "name": "libvorbis0a",
+      "version": "1.3.5-4.2+srt2",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libv/libvorbis/libvorbis0a_1.3.5-4.2%2Bsrt2_amd64.deb",
+      "sha256": "808411459a4e660ef5b459b19f145d34f6fd7750609e91985e34e95eaab62888",
+      "size": 92224
+    },
+    {
+      "name": "libvorbisenc2",
+      "version": "1.3.5-4.2+srt2",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/libv/libvorbis/libvorbisenc2_1.3.5-4.2%2Bsrt2_amd64.deb",
+      "sha256": "3273f701ce01742e8eb746b4b4102f05c6ea6771561b73292e94d8d42dad142f",
+      "size": 77704
+    },
+    {
+      "name": "libwrap0",
+      "version": "7.6.q-21+srt6",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/t/tcp-wrappers/libwrap0_7.6.q-21%2Bsrt6_amd64.deb",
+      "sha256": "a05d3c3bbdb0059b2693602dfc614ec458e53987d625a7712f3171fa53642f15",
+      "size": 57328
+    },
+    {
+      "name": "libjson0",
+      "version": "0.9-1ubuntu1.4+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/j/json-c/libjson0_0.9-1ubuntu1.4%2Bsrt1_amd64.deb",
+      "sha256": "aa838cb0f08763377c065f9bec60efc46670d3a7f7ba1bd8b139e3e36650f891",
+      "size": 16344
+    }
+  ]
+}
