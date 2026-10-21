@@ -1,88 +1,46 @@
 # System changes
 
-This page describes what setup installs and how the launcher works. For the short installation guide, start with [the README](README.md).
+Setup runs as the normal Steam user. It does not need sudo and does not modify the kernel, firmware, thermal limits, system root filesystem or global Vulkan configuration.
 
-## Files created
+## Downloads and files
 
-| Location | Purpose |
-| --- | --- |
-| `~/.local/share/steamvr-home-frame/` | Private launcher, Python source, graphics profile, dependency libraries, notices, installation receipt, process state, logs, and merged game directory. |
-| `~/.cache/steamvr-home-frame/` | Checksum-addressed dependency and artwork downloads, plus installer lock/progress files. |
-| Steam's `steamapps/content/app_250820/depot_250830` and `depot_250832` | Official Home assets and Linux executables, if missing. On Frame these are commonly under Steam's `steamrtarm64` directory. |
-| Steam's `steamapps/common/FEX-Emu/` | Valve's FEX runtime, if missing; requested as app 3127680. |
-| Steam's shortcut data | One entry named **SteamVR Home (Frame - Unofficial)**, created through the running client. Existing entries are not rewritten by the installer. |
-| Steam's current-user `userdata/<account>/config/grid/` | The official Home capsule used for this shortcut's portrait, copied through Steam's artwork API. |
+The signed-in Steam client downloads SteamVR application 250820 depots:
 
-Setup discovers your Steam libraries and records the install paths and shortcut ID in a local installation receipt.
+| Depot | Pinned manifest | Content |
+| --- | --- | --- |
+| 250830 | 1874458903680892192 | Home assets |
+| 250832 | 3112697343985428860 | Linux Home executable and libraries |
 
-## Download sources
+Only entries in Steam's matching cached manifest are eligible. Each selected file's size and SHA-1 content digest are checked. Unlisted files, including old user saves and generated configuration in a reused depot, are excluded. Immutable files are linked from the private layout; writable configuration and the main executable are copied. Private quality edits replace links atomically so they do not write into the shared depot.
 
-Home is requested through the signed-in Steam client, app 250820. New downloads use these pinned manifests:
+Valve's FEX runtime is found in the Steam libraries or requested through Steam (application 3127680). Required compatibility libraries are downloaded from Valve's package server using the exact URLs, sizes and SHA-256 hashes in `packages.lock.json`. Package installation scripts are not run; only needed libraries and license notices are extracted privately.
 
-| Depot | Manifest |
-| --- | --- |
-| 250830, Home content | 1874458903680892192 |
-| 250832, Linux application | 3112697343985428860 |
+The installer creates `~/.local/share/steamvr-home-frame/` and uses `~/.cache/steamvr-home-frame/`. Steam's official download cache and FEX are shared resources. Setup applies Valve's SteamVR Home artwork to the new shortcut.
 
-Existing depots are reused. Setup checks their module dependencies and waits for Steam to finish any new downloads. Steam handles authorization and content delivery through your signed-in account.
+## Steam and VR integration
 
-Valve’s FEX runtime is reused when installed. If it is missing, setup requests app 3127680 through Steam and waits for it. No separate FEX installation step is needed. The Frame’s SteamOS VR installation must supply `/usr/share/guestos/fex-mesa` and the SteamVR runtime in `/opt/steamvr`; setup checks for these before downloading anything.
+The library shortcut is named **SteamVR Home (Frame - Unofficial)**. It is registered as a VR application using the shortcut's own app key, including the native ARM executable field required by Frame. Content and Workshop requests retain SteamVR's application ID. The launcher does not force a particular room or change subscriptions.
 
-The 17 small compatibility packages in `packages.lock.json` come from `https://repo.steampowered.com/steamrt1/apt/`. Their SHA-256 hashes, sizes, and versions are pinned from Valve's published runtime metadata. The package downloader extracts only architecture-checked x86-64 shared libraries and copyright notices into the private folder. It does not run Debian maintainer scripts or install `.deb` files into SteamOS. No libraries are bundled in the public source release.
+The launcher may briefly request Workshop metadata through the native Steam API before starting Home. Failed or offline requests fall back to normal startup.
 
-The dependencies include libpng12, libva and its helpers, libvdpau, libXfixes, PulseAudio client libraries, and PulseAudio's dependencies. They are old compatibility libraries for this older application, not general-purpose replacements for system libraries. Package notices are saved in `third-party-notices/`; provenance is saved in `dependency-provenance.json`.
+Setup and uninstall use Steam's local developer interface for shortcut management. The tool accepts only a loopback connection and rejects redirects. It does not replace `shortcuts.vdf` or rewrite unrelated shortcuts. Steam's CEF Remote Debugging setting may need to be enabled manually; it is not required for ordinary launches.
 
-## Game layout and configuration
+## Rendering and audio
 
-The installer creates a separate game directory using links to official depot files. The small main executable is copied so Home resolves its game root inside the private installation. Writable configuration is copied into that directory. The original depots are not patched.
+The launcher uses Valve's FEX with its native Vulkan forwarding libraries where available. Audio connects to the user's existing PulseAudio/PipeWire service. No audio services are restarted.
 
-The private graphics profile, `steamtours/vr_fidelity_levels_override.csv`, defines levels 0–8 with 4× MSAA and render scales 0.80–1.20. Home selects its active level dynamically. Rendering uses ordinary stereo with foveation off. Shadows, lighting, and scene effects are retained.
+The profile retains 4× MSAA, uses 16× anisotropic filtering and a 1.05 render scale. The actual eye dimensions depend on the runtime's recommendation. Sun shadow maximum is configured to 1536 and its atlas to 4096, preserving shadow draw distance, lighting and other major features.
 
-The launcher sets a library search path only for the guest Home process, points FEX to `/usr/share/guestos/fex-mesa`, uses `/opt/steamvr/bin/linux64/vrclient.so`, and connects the guest audio client to the current user's existing PulseAudio socket. Home receives app ID 250820 for SteamVR content and Workshop access, while preserving the shortcut game ID supplied by Steam. The outer launcher remains attached to the non-Steam library entry until Home exits.
+Our private Vulkan adapter corrects coverage in a specific optional alpha-tested depth pass. It does not replace the final colour rendering with a smoothing filter. Known game files and the adapter are hash-checked before enabling the optimization. An unsupported build or missing adapter disables that optional prepass. On a matched-pipeline creation failure, the adapter falls back to a depth pass that writes no depth. This favours correct colour rendering over the optimization's performance benefit.
 
-Home writes its normal configuration, logs, caches, Steam Cloud data, and Workshop data. It uses its normal networking, including a local game-server socket. Steam manages subscribed Workshop downloads. Subscription choices and download controls remain in Steam.
+The compiled ARM64 library and shader are our own code, shipped with source. Only this Home process receives the layer settings. No layer is installed globally. The release contains no Valve executable, extracted Valve shader or modified Valve script.
 
-Your chosen home environment is saved in Home’s private configuration and loaded at startup.
+## Startup, stopping and removal
 
-Optional library artwork is Valve's original `tools/content/steamvr_home_capsule_main.png`: the pavilion image with the Steam logo and HOME text. SteamVR's `tools/tools.vrmanifest` identifies this as Home's image. It is fetched unchanged from the public [SteamTracking mirror](https://github.com/SteamTracking/GameTracking-SteamVR/blob/76f1bd5ebdc45ae50824661d5430f8a9e5c71c40/tools/content/steamvr_home_capsule_main.png), hosted on GitHub, not Valve's download server. The URL is fixed to that commit. Its 149,503 bytes are pinned to SHA-256 `de5888c4e2f0db5822cbe3bdf245d583e7a195eec98ed0102d0566e852ccae30` and cached under `~/.cache/steamvr-home-frame/artwork/`. The downloader rejects redirects and changed/incomplete images. No artwork is bundled in this installer.
+Steam Stop asks the matching Home window to close normally so preferences can be saved. If it fails to exit, a bounded fallback terminates that verified process. This does not guarantee every scripted room can shut down cleanly.
 
-Setup copies the image into Steam's vertical-tile artwork slot and points this shortcut's list icon to the verified PNG in the artwork cache. Steam fits it to those slots. Deleting that cached PNG later removes the list icon until it is set again through the shortcut's properties. The wide banner keeps the **SteamVR Home (Frame - Unofficial)** text title. Setup skips artwork if Steam reports existing custom images or lacks the interface. Steam manages the copied images, which may remain cached after shortcut removal. Artwork failure does not prevent installation.
+Steam Cloud account data is separate from the private installation. A fresh install can restore an older cloud-saved room even though no local settings were copied. Setup does not delete cloud saves or change subscriptions.
 
-## Native graphics forwarding
+Uninstall removes only the verified shortcut and this installation's VR registration, then renames the private directory to `.uninstalled`. It leaves the shared depots, FEX, Workshop content and other Home variants in place. An existing `.uninstalled` backup must be preserved elsewhere before another uninstall.
 
-When Valve's FEX install includes `GuestThunks/libvulkan-guest.so` and `HostThunks/libvulkan-host.so`, setup creates a private `vulkan/libvulkan.so.1` link to the guest library. The launcher puts that private folder first in Home's library path and sets `FEX_THUNKHOSTLIBS` and `FEX_THUNKGUESTLIBS` for its child process. This forwards Vulkan calls to the installed ARM64 driver. It does not patch the driver, the FEX root filesystem, or global FEX settings. Existing native Vulkan layers may also load according to their existing configuration.
-
-If forwarding libraries are absent, Home uses the emulated x86 driver. The `--emulated-vulkan` launch option selects that fallback explicitly. No driver or extra forwarding binary is downloaded by this project.
-
-## Desktop companion window
-
-During the first 30 seconds of startup, the launcher uses the existing X11 library to find a window named `SteamVR Home` owned by the exact game process it started. It hides only that window and watches for startup remapping. It does not close it, alter other applications, or change headset resolution. The check ends after that window of time or when Home exits; no permanent service is installed.
-
-The hidden window also disappears from the desktop taskbar. Close Home using **Stop** in Steam’s **Currently Running Games** or library entry. Use `--show-mirror` in launch options to keep the desktop window visible.
-
-## Steam UI integration
-
-Installation uses Steam’s local Chromium debugging endpoint at `127.0.0.1:8080` to request downloads and create the shortcut through `SteamClient`. The shortcut is marked as VR. A brief theater view may appear during startup on some Steam versions.
-
-Temporary download callbacks are removed after each operation. If setup is forcibly closed, its callback may remain until setup runs again or Steam restarts. No persistent UI script or service is installed. The local interface is used for installation and shortcut removal; normal launches do not connect to it.
-
-If the endpoint is disabled, setup stops with instructions to enable CEF Remote Debugging through Steam settings. Enabling that setting gives local applications access to a powerful client interface, so it may be turned off again after setup.
-
-## Updates and uninstall
-
-Dependencies and the private game tree are prepared in a temporary folder, then checked with FEX's x86-64 dynamic loader. The installed tree is replaced only after checks pass. Existing package configuration is retained during updates. The previous installation is kept beside the new one as a recoverable backup. Interrupted Steam downloads may remain in Steam's download directories; rerunning the installer can resume them.
-
-A failed shortcut step leaves the complete private runtime in place so setup can be rerun. Installation does not stop/restart Steam or the native VR compositor. Stop Home before updating it.
-
-Close Home and run `bash ~/.local/share/steamvr-home-frame/Uninstall.sh` to uninstall. The uninstaller checks that the shortcut still points to this package before removing it. It moves the private installation to `~/.local/share/steamvr-home-frame.uninstalled`, keeping your configuration and logs recoverable. You can delete that saved folder later.
-
-Official depots, FEX, Workshop subscriptions/content, the download cache, and earlier update backups remain in place. Remove shared components only when nothing else needs them. To undo an update, restore the previous folder to the original install path while Home is stopped.
-
-## Unchanged
-
-- SteamOS's read-only system and package database.
-- Native graphics drivers and the FEX system root filesystem.
-- The native SteamVR server and compositor.
-- Other game shortcuts, controller profiles, and installed mods.
-- Global speaker/microphone settings and Workshop subscriptions.
-- Services, startup tasks, and firewall configuration.
+Logs can contain local paths and Steam identifiers. Review them before sharing. No personal development logs are included in the public package.

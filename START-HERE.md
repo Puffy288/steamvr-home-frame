@@ -51,7 +51,7 @@ No administrator password is needed. Leave Konsole open until it says **Installe
 
 Press **Steam**, then open **Library → Non-Steam → SteamVR Home (Frame - Unofficial) → Play**. Future launches only need this library entry. You can close Chromium and Konsole once setup finishes.
 
-To close Home, select it in **Currently Running Games** and choose **Stop**.
+To close Home, open the dashboard, select the running **SteamVR Home (Frame - Unofficial)** application and choose **Exit Game**. **Stop** on its library page also works.
 
 ## If something gets stuck
 

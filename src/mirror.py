@@ -7,7 +7,7 @@ import ctypes as C
 import ctypes.util
 
 
-def hide_companion(pid, finished):
+def hide_companion(pid, finished, close=False):
     display = None
     try:
         library = ctypes.util.find_library('X11')
@@ -27,6 +27,7 @@ def hide_companion(pid, finished):
                                     C.POINTER(ulong), C.POINTER(ulong), C.POINTER(ptr)], integer),
             'XFetchName': ([ptr, ulong, C.POINTER(ptr)], integer),
             'XUnmapWindow': ([ptr, ulong], integer),
+            'XSendEvent': ([ptr, ulong, integer, C.c_long, ptr], integer),
             'XFlush': ([ptr], integer), 'XSync': ([ptr, integer], integer),
             'XFree': ([ptr], integer), 'XCloseDisplay': ([ptr], integer),
         }
@@ -86,7 +87,7 @@ def hide_companion(pid, finished):
             hidden = False
             # Catch the first window before Steam promotes it to a theater
             # overlay. Keep watching briefly in case startup maps it again.
-            for _ in range(300):
+            for _ in range(1 if close else 300):
                 if finished.is_set():
                     return
                 candidates = children(root)
@@ -94,6 +95,26 @@ def hide_companion(pid, finished):
                     candidates.extend(children(window))
                 for window in candidates:
                     if matches(window) and not finished.is_set():
+                        if close:
+                            class ClientMessage(C.Structure):
+                                _fields_ = [('type', integer), ('serial', ulong),
+                                            ('send_event', integer), ('display', ptr),
+                                            ('window', ulong), ('message_type', ulong),
+                                            ('format', integer), ('data', C.c_long * 5)]
+                            class Event(C.Union):
+                                _fields_ = [('client', ClientMessage), ('padding', C.c_long * 24)]
+                            event = Event()
+                            event.client.type = 33  # X11 ClientMessage
+                            event.client.send_event = 1
+                            event.client.display = display
+                            event.client.window = window
+                            event.client.message_type = x.XInternAtom(display, b'WM_PROTOCOLS', 0)
+                            event.client.format = 32
+                            event.client.data[0] = x.XInternAtom(display, b'WM_DELETE_WINDOW', 0)
+                            x.XSendEvent(display, window, 0, 0, C.byref(event))
+                            x.XSync(display, 0)
+                            print('Asked Home to save and close normally.', flush=True)
+                            return True
                         x.XUnmapWindow(display, window)
                         x.XSync(display, 0)
                         if not hidden:
@@ -109,3 +130,11 @@ def hide_companion(pid, finished):
             x.XSetErrorHandler(previous_handler)
     except (OSError, AttributeError) as exc:
         print('Mirror hiding unavailable:', exc, flush=True)
+
+
+if __name__ == '__main__':
+    import sys
+    import threading
+    if len(sys.argv) == 3 and sys.argv[1] == '--close':
+        sys.exit(0 if hide_companion(int(sys.argv[2]), threading.Event(), close=True) else 1)
+    sys.exit('Usage: mirror.py --close PID')

@@ -1,0 +1,12 @@
+{
+  "files": {
+    "steamtours/shaders_vulkan_dir.vpk": "5f0d34b94148652bbdd3d134b9b8bb9132ed1cc8e8a6136625f6117daaf50eaa",
+    "steamtours/shaders_vulkan_000.vpk": "b0eca52decfd72c2e31d72f93586377bfca4da2adafac66cb889979b48567c04",
+    "steamtours/shaders_vulkan_001.vpk": "1a77e1a9e9ccfb593142e0f370eb7b6ac31eb97e78d7e9170328b7952cdebb36",
+    "bin/linuxsteamrt64/librendersystemvulkan.so": "5d2b3cd23354d160a28aecbbc019c2695ed4141e282c2ccfe80a5b22859d496b",
+    "bin/linuxsteamrt64/libengine2.so": "6033ccb9f8be7ffaa078baaed2eea6e84650ef6886e0e46ac1e1ae932ea1eac6"
+  },
+  "shader_sha256": "0c68832efc83baf5ba60c7f3d9789c1899eb6791dff798c51186c842ffd2664a",
+  "engine": "Source2",
+  "samples": 4
+}

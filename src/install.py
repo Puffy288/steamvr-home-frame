@@ -11,41 +11,39 @@ import subprocess
 import sys
 import tempfile
 
-from common import INSTALL, VERSION, DEPOTS, find_steam, live_process, write_json
+from common import INSTALL, VERSION, DEPOTS, find_steam, library_paths, live_process, write_json
 from depot import ensure_depot, ensure_fex
 from libraries import install_libraries
 from shortcut import add_shortcut, remove_shortcut
 from steamui import SteamUI
 from artwork import apply_official_artwork
+from vr_application import register
+from quality import configure_quality
+from stock_manifest import merge_verified
 
 SOURCE = Path(__file__).resolve().parents[1]
 ROOTFS = Path('/usr/share/guestos/fex-mesa')
 VR = Path('/opt/steamvr')
 
 
-def merge_assets(source, destination):
-    """Build real directories with links to immutable depot files, never modifying depots."""
-    for root, dirs, files in os.walk(source, followlinks=False):
-        relative = Path(root).relative_to(source)
-        target_dir = destination / relative
-        target_dir.mkdir(parents=True, exist_ok=True)
-        # Hand-assembled installations may contain directory links into the assets depot.
-        # The assets pass already supplies these; never follow arbitrary directory links.
-        dirs[:] = [d for d in dirs if not (Path(root) / d).is_symlink()]
-        for name in files:
-            original = Path(root) / name
-            target = target_dir / name
-            if original.is_symlink():
-                continue
-            if name in ['console.log', 'vr_fidelity_levels_override.csv'] or name.endswith('.log'):
-                continue
-            if os.path.lexists(target):
-                target.unlink()
-            if 'cfg' in relative.parts or (relative == Path('bin/linuxsteamrt64') and name == 'steamtours'):
-                # Keep user-writable configuration private, including defaults.
-                shutil.copy2(original, target)
-            else:
-                target.symlink_to(original)
+def merge_assets(source, destination, manifest):
+    return merge_verified(source, manifest, destination)
+
+
+def find_manifest(steam, depot):
+    for root in library_paths(steam):
+        path = root / 'depotcache' / f'{depot}_{DEPOTS[depot]}.manifest'
+        if path.is_file():
+            return path
+    raise RuntimeError(f'Pinned Steam manifest {depot}/{DEPOTS[depot]} is missing. '
+                       'Download this Home depot through Steam before retrying.')
+
+
+def require_fresh_destination(destination):
+    if os.path.lexists(destination):
+        raise RuntimeError('This release requires a fresh installation. Close Home and run the '
+                           'existing installation\'s Uninstall.sh first. Its settings are kept '
+                           'in a separate .uninstalled folder; no files were overwritten.')
 
 
 def validate(runtime, fex):
@@ -89,6 +87,7 @@ def check_platform():
 
 
 def install(destination):
+    require_fresh_destination(destination)
     check_platform()
     if destination.is_symlink():
         raise RuntimeError('Install directory must not be a symlink.')
@@ -100,14 +99,7 @@ def install(destination):
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             raise RuntimeError('Another installer is already running.')
-        if live_process(destination / 'process.json'):
-            raise RuntimeError('Close SteamVR Home before updating it.')
-        config_path = destination / 'installation.json'
-        if destination.exists() and not config_path.is_file():
-            raise RuntimeError('Install folder already exists without an installation receipt. Preserve it and choose another folder.')
-        previous = json.loads(config_path.read_text()) if config_path.is_file() else {}
-        if previous and previous.get('project') != 'steamvr-home-frame':
-            raise RuntimeError('Unrecognized installation receipt; refusing to overwrite.')
+        require_fresh_destination(destination)
         with SteamUI() as ui:
             # Fail early if the Steam build removed required APIs.
             ready = ui.evaluate('''["AddShortcut","SetShortcutName","SetShortcutExe",
@@ -138,15 +130,10 @@ def install(destination):
                 else:
                     print('Native Vulkan forwarding is unavailable; using the emulated driver.', flush=True)
                 print('Preparing the private Home game directory...', flush=True)
-                merge_assets(assets, stage / 'game')
-                merge_assets(binary, stage / 'game')
-                # Preserve configurations from previous installations of THIS package.
-                old_cfg = destination / 'game/steamtours/cfg'
-                if old_cfg.is_dir():
-                    shutil.copytree(old_cfg, stage / 'game/steamtours/cfg', dirs_exist_ok=True)
-                override = stage / 'game/steamtours/vr_fidelity_levels_override.csv'
-                shutil.copy2(SOURCE / 'frame-fidelity.csv', override)
-                for name in ['src', 'docs', 'README.md', 'START-HERE.md', 'SYSTEM-CHANGES.md', 'LICENSE', 'Launch.sh',
+                verified_assets = merge_assets(assets, stage / 'game', find_manifest(steam, 250830))
+                verified_binary = merge_assets(binary, stage / 'game', find_manifest(steam, 250832))
+                configure_quality(SOURCE, stage / 'game')
+                for name in ['src', 'coverage', 'docs', 'README.md', 'START-HERE.md', 'SYSTEM-CHANGES.md', 'LICENSE', 'Launch.sh',
                              'Uninstall.sh', 'packages.lock.json']:
                     source = SOURCE / name
                     target = stage / name
@@ -161,32 +148,24 @@ def install(destination):
                            'steam': str(steam), 'fex': str(fex), 'rootfs': str(ROOTFS),
                            'vr': str(VR), 'assets': str(assets), 'binary': str(binary),
                            'requested_manifests_for_new_downloads': DEPOTS,
-                           'shortcut_id': previous.get('shortcut_id')}
+                           'verified_valve_files': len(verified_assets) + len(verified_binary),
+                           'shortcut_id': None}
                 write_json(stage / 'installation.json', receipt)
-                stamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
-                backup = destination.with_name(destination.name + '.previous-' + stamp)
-                if backup.exists():
-                    raise RuntimeError('A previous installation backup exists at ' + str(backup) + '. Preserve or move it before updating again.')
-                if destination.exists():
-                    destination.rename(backup)
-                try:
-                    stage.rename(destination)
-                except Exception:
-                    if backup.exists():
-                        backup.rename(destination)
-                    raise
-            # An interruption here leaves a complete, repairable runtime. Rerunning
-            # will recognize the same target and never duplicate the shortcut.
+                require_fresh_destination(destination)
+                stage.rename(destination)
+            # If Steam registration fails, this receipt allows safe uninstall.
+            # Fresh setup never replaces a previous runtime or imports its saves.
             print('Adding SteamVR Home (Frame - Unofficial) to the library...', flush=True)
-            receipt['shortcut_id'] = add_shortcut(ui, destination, previous.get('shortcut_id'))
+            receipt['shortcut_id'] = add_shortcut(ui, destination)
             write_json(destination / 'installation.json', receipt)
             try:
                 applied = apply_official_artwork(ui, cache / 'artwork', destination, receipt['shortcut_id'])
                 if applied:
-                    print('Added Valve\'s official SteamVR Home cover and list icon.', flush=True)
+                    print('Added Home artwork: ' + ', '.join(applied) + '.', flush=True)
             except (RuntimeError, OSError, ValueError) as exc:
                 # Artwork must never turn a working installation into a failure.
-                print('Library artwork skipped: ' + str(exc), flush=True)
+                print('Optional Home artwork skipped: ' + str(exc), flush=True)
+            register(destination, receipt['shortcut_id'], VR)
         print('\nInstalled. Open Steam Library → Non-Steam → SteamVR Home (Frame - Unofficial) → Play.', flush=True)
         print('Private files:', destination, flush=True)
         print('Download cache:', cache, flush=True)
@@ -205,6 +184,7 @@ def uninstall(destination):
     if saved.exists():
         raise RuntimeError('An earlier uninstall backup exists: ' + str(saved))
     if config.get('shortcut_id'):
+        register(destination, config['shortcut_id'], config['vr'], remove=True)
         with SteamUI() as ui:
             remove_shortcut(ui, destination, config['shortcut_id'])
     # Keep saved settings/logs recoverable rather than silently deleting them.

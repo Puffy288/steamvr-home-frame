@@ -21,7 +21,7 @@ A fun experiment: SteamVR Home running locally on your Frame. Explore Workshop e
 
 ## See it running
 
-Screenshots from SteamVR Home running on Steam Frame. Both environments below are made by Valve.
+Screenshots from SteamVR Home running on Steam Frame, captured on the earlier build. Both environments below are made by Valve.
 
 **Ilia’s Retreat** — [get it on Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=927882107)
 
@@ -32,8 +32,6 @@ Screenshots from SteamVR Home running on Steam Frame. Both environments below ar
 ![SteamVR Home menu in Ilia’s Retreat](docs/screenshots/ilias-retreat-menu.jpg)
 
 **Mount Rainier** — [get it on Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1180765965)
-
-Snow, rocks, and puffy clouds above the mountain.
 
 ![Mount Rainier running on Steam Frame](docs/screenshots/mount-rainier.jpg)
 
@@ -49,15 +47,11 @@ This requires Steam Frame running SteamOS VR. Setup checks for the Frame compone
 
 ## Playing and closing Home
 
-Choose **Play** from its library entry. Home opens the environment you saved as your home. To close it, choose **Stop** in **Currently Running Games** or on its library page.
-
-The desktop mirror is hidden, so Home does not need a separate desktop window. If you want that window visible, add `--show-mirror` to the shortcut’s launch options.
-
-Home uses the Frame’s existing controls: trigger/bumper to use things, grip for inventory, stick up to teleport, and stick left/right to turn. Sound plays through the headset. The library entry uses Valve’s SteamVR Home cover and small icon.
+Choose **Play** from its library entry. To close it, open the dashboard, select the running **SteamVR Home (Frame - Unofficial)** application and choose **Exit Game**. **Stop** on its library page also works.
 
 ## Performance and Workshop downloads
 
-The graphics profile keeps shadows, lighting, scene effects, and 4× anti-aliasing. Home adjusts its render scale while running. Workshop environments range from simple rooms to ultra detailed landscapes, so performance varies with what you visit.
+The graphics profile keeps shadows, lighting, scene effects, and 4× anti-aliasing. Workshop environments range from simple rooms to ultra detailed landscapes, so performance varies with what you visit.
 
 **Already subscribed to lots of environments?** Steam may download them when Home starts. Downloading and unpacking can cause extra stutter. Let those downloads finish, or pause them in Steam, for smoother play. You only need the environment you want to visit to finish downloading.
 
@@ -79,7 +73,7 @@ If you need to uninstall, close Home and run:
 bash ~/.local/share/steamvr-home-frame/Uninstall.sh
 ```
 
-This removes its library entry and keeps the private folder as `steamvr-home-frame.uninstalled` so your settings remain recoverable. Shared Steam downloads, FEX, and Workshop content stay in place. [More uninstall details](SYSTEM-CHANGES.md#updates-and-uninstall).
+This removes its library entry and keeps the private folder as `steamvr-home-frame.uninstalled` so your settings remain recoverable. Shared Steam downloads, FEX, and Workshop content stay in place. [More uninstall details](SYSTEM-CHANGES.md#startup-stopping-and-removal).
 
 ## If something goes wrong
 
@@ -88,10 +82,13 @@ This removes its library entry and keeps the private folder as `steamvr-home-fra
 - **Another Home is running:** close it before starting another instance.
 - **Audio is missing:** check the headset output and app volume.
 - **A download fails:** check Steam’s connection and available storage, then rerun the installer.
-- **A Steam or SteamOS update breaks Home:** close Home and rerun setup. Setup keeps the previous private installation as a backup.
 
 ## About the project
 
 This is a community installer, unaffiliated with Valve. It runs Home locally using Valve’s FEX translation and native Vulkan forwarding where available. The release contains the installer’s source, configuration, documentation, and screenshots; Home itself is downloaded from Valve.
 
 Project code is MIT-licensed. Downloaded components and game artwork retain their own rights and licenses. See [SYSTEM-CHANGES.md](SYSTEM-CHANGES.md) for the technical details.
+
+## What’s improved
+
+Version 2.0.0 improves texture clarity, reduces edge flicker, and improves VR launch and closing.

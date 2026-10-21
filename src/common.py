@@ -6,7 +6,7 @@ import re
 import tempfile
 
 APP_NAME = 'SteamVR Home (Frame - Unofficial)'
-VERSION = '0.1.0'
+VERSION = '2.0.0'
 INSTALL = Path.home() / '.local/share/steamvr-home-frame'
 DEPOTS = {250830: '1874458903680892192', 250832: '3112697343985428860'}
 

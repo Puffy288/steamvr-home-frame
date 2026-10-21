@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import time
 
-from common import DEPOTS, find_depot, find_fex
+from common import DEPOTS, find_depot, find_fex, library_paths
 
 
 def command(ui, text):
@@ -30,7 +30,9 @@ def ensure_depot(ui, steam, depot):
     progress.mkdir(parents=True, exist_ok=True)
     pending = progress / f'depot-{depot}.pending'
     existing = find_depot(steam, depot)
-    if existing and not pending.exists():
+    manifest_available = any((root / 'depotcache' / f'{depot}_{DEPOTS[depot]}.manifest').is_file()
+                             for root in library_paths(steam))
+    if existing and manifest_available and not pending.exists():
         print(f'Reusing Home depot {depot}.', flush=True)
         return existing
     print(f'Downloading Home depot {depot} through Steam. This can take several minutes.', flush=True)

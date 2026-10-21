@@ -1,30 +1,42 @@
 #!/usr/bin/env python3
-"""Build source-only release files from an explicit allowlist."""
+"""Build our installer, source and own compiled adapter from an explicit allowlist."""
 import base64
 import hashlib
 from pathlib import Path
 import zipfile
 import io
 import os
+import json
 
 ROOT = Path(__file__).resolve().parent
 TOP = ['Install.sh', 'Launch.sh', 'Uninstall.sh', 'README.md', 'START-HERE.md', 'SYSTEM-CHANGES.md',
-       'LICENSE', 'packages.lock.json', 'frame-fidelity.csv',
+       'LICENSE', 'packages.lock.json', 'frame-fidelity.csv', 'frame-quality.cfg',
+       'docs/TESTING.md', 'docs/DEVELOPMENT.md', 'RELEASE-NOTES.md',
        'build_release.py', '.gitignore']
 MEDIA = ['docs/screenshots/ilias-retreat.jpg', 'docs/screenshots/ilias-retreat-menu.jpg',
          'docs/screenshots/mount-rainier.jpg', 'docs/screenshots/konsole-on-frame.jpg']
-FILES = TOP + MEDIA + [str(p.relative_to(ROOT)) for directory in ['src', 'tests']
+COVERAGE = ['coverage_layer.cpp', 'coverage.frag', 'coverage.spv', 'coverage_spv.h',
+            'expected.h', 'supported-game.json', 'integrity.json', 'build.py', 'libport2_coverage.so']
+FILES = TOP + MEDIA + ['coverage/' + name for name in COVERAGE] + ['tests/test_coverage_layer.cpp'] + [str(p.relative_to(ROOT)) for directory in ['src', 'tests']
                for p in sorted((ROOT / directory).glob('*.py'))]
 
 
 def source_zip():
+    adapter = ROOT / 'coverage/libport2_coverage.so'
+    binary = adapter.read_bytes()
+    if binary[:6] != b'\x7fELF\x02\x01' or int.from_bytes(binary[18:20], 'little') != 183:
+        raise RuntimeError('The release requires our ARM64 ELF adapter.')
+    integrity = json.loads((ROOT / 'coverage/integrity.json').read_text())
+    for name, expected in integrity.items():
+        if hashlib.sha256((ROOT / 'coverage' / name).read_bytes()).hexdigest() != expected:
+            raise RuntimeError('Adapter integrity mismatch: ' + name)
     stream = io.BytesIO()
     with zipfile.ZipFile(stream, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for name in FILES:
             path = ROOT / name
             if path.is_symlink():
                 raise RuntimeError('Release sources must not be symlinks: ' + name)
-            info = zipfile.ZipInfo('steamvr-home-frame/' + name, date_time=(2026, 10, 15, 0, 0, 0))
+            info = zipfile.ZipInfo('steamvr-home-frame/' + name, date_time=(2026, 10, 22, 0, 0, 0))
             info.create_system = 3
             info.external_attr = (0o100755 if name.endswith('.sh') else 0o100644) << 16
             info.compress_type = zipfile.ZIP_DEFLATED

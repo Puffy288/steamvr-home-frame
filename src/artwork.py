@@ -46,10 +46,22 @@ def official_capsule(cache):
 
 
 def apply_official_artwork(ui, cache, install, appid):
-    """Keep existing custom art; set the vertical tile and list icon only."""
+    """Keep custom library art and install the official dashboard portrait."""
     appid = int(appid)
     if details(ui, appid).get('exe', '').strip('"') != str(install / 'Launch.sh'):
         raise RuntimeError('Artwork target does not belong to this installation.')
+    data = official_capsule(cache)
+    # The native VR dashboard reads its manifest, not Steam's library artwork.
+    # Keep a local copy beside that manifest; no Valve image ships in our kit.
+    path = install / 'home-cover.png'
+    fd, temporary = tempfile.mkstemp(prefix='.home-cover-', dir=install)
+    try:
+        with os.fdopen(fd, 'wb') as stream:
+            stream.write(data)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
     state = ui.evaluate('''(()=>{
         const app=appStore.GetAppOverviewByAppID(APPID);
         return {supported:typeof SteamClient.Apps.SetCustomArtworkForApp==="function"
@@ -57,10 +69,9 @@ def apply_official_artwork(ui, cache, install, appid):
             custom:typeof app?.BHasCustomImages==="function" ? app.BHasCustomImages() : null};
     })()'''.replace('APPID', str(appid)))
     if not state or not state.get('supported') or state.get('custom') is not False:
-        return []
-    data = official_capsule(cache)
+        return ['Home dashboard cover']
     payload = json.dumps(base64.b64encode(data).decode('ascii'))
     ui.evaluate(f'SteamClient.Apps.SetCustomArtworkForApp({appid},{payload},"png",0)')
     icon_path = json.dumps(str(cache / (ART_SHA256 + '.png')))
     ui.evaluate(f'SteamClient.Apps.SetShortcutIcon({appid},{icon_path})')
-    return ['Home cover', 'Home list icon']
+    return ['Home dashboard cover', 'Home library cover', 'Home list icon']
