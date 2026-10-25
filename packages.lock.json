@@ -1,5 +1,5 @@
 {
-  "metadata_url": "https://repo.steampowered.com/steamrt1/images/1.0.20260714.251828/steam-runtime.manifest.deb822.gz",
+  "metadata_url": "https://repo.steampowered.com/steamrt1/images/1.0.20261021.266054/steam-runtime.manifest.deb822.gz",
   "packages": [
     {
       "name": "libpng12-0",
@@ -52,10 +52,10 @@
     },
     {
       "name": "libpulse0",
-      "version": "1:1.1-0ubuntu15.4+steamrt1.1+srt1",
-      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/p/pulseaudio/libpulse0_1.1-0ubuntu15.4%2Bsteamrt1.1%2Bsrt1_amd64.deb",
-      "sha256": "a5562379952154fda251959e4a767837f676d263d8a25401ffd3a8370d00ca93",
-      "size": 267282
+      "version": "1:1.1-0ubuntu15.4+steamrt1.2+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/p/pulseaudio/libpulse0_1.1-0ubuntu15.4%2Bsteamrt1.2%2Bsrt1_amd64.deb",
+      "sha256": "b473ea82b9967181bd755d416623bffa4a37628e2d12499330806fb01179ee49",
+      "size": 266866
     },
     {
       "name": "libasyncns0",
@@ -108,10 +108,10 @@
     },
     {
       "name": "libwrap0",
-      "version": "7.6.q-21+srt6",
-      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/t/tcp-wrappers/libwrap0_7.6.q-21%2Bsrt6_amd64.deb",
-      "sha256": "a05d3c3bbdb0059b2693602dfc614ec458e53987d625a7712f3171fa53642f15",
-      "size": 57328
+      "version": "7.6.q-21+steamrt1.1+srt1",
+      "url": "https://repo.steampowered.com/steamrt1/apt/pool/main/t/tcp-wrappers/libwrap0_7.6.q-21%2Bsteamrt1.1%2Bsrt1_amd64.deb",
+      "sha256": "74d0e3ea0b5bb5fe70870f424c5afb9b122775b1301b4fe3a9d8964014d306cd",
+      "size": 57508
     },
     {
       "name": "libjson0",
